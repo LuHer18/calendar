@@ -60,6 +60,11 @@ export const useAuthStore = () => {
         }
     }
 
+    const starLogout = () => {
+        localStorage.clear();
+        dispatch(onLogout());
+    }
+
     return {
         //Propiedades
         status,
@@ -70,7 +75,8 @@ export const useAuthStore = () => {
         //Métodos
         starLogin,
         starRegister,
-        checkAuthToken
+        checkAuthToken,
+        starLogout
 
     }
 }
