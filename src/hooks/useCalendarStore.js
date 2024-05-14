@@ -27,15 +27,24 @@ export const useCalendarStore = () => {
             
         } catch (error) {
             console.log(error);
-            Swal.fire('Error al guardar', error.response.data?.msg, 'eror')
+            Swal.fire('Error al guardar', error.response.data?.msg, 'error')
             
         }
         //todo: update event
         
 
     }
-    const starDeletingEvent = () => {
-        dispatch(onDeleteEvent())
+    const starDeletingEvent = async() => {
+        try {
+            await calendarAPi.delete(`/events/${activeEvent.id}`)
+            dispatch(onDeleteEvent())
+        } catch (error) {
+            console.log(error);
+            Swal.fire('Denegado', error.response.data?.msg, 'error')
+        }
+        
+
+        
     }
 
     const starLoadingEvents = async () => {
