@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux"
-import { onAddNewEvent, onDeleteEvent, onSetActiveEvent, onUpdateEvent } from "../store";
+import { onAddNewEvent, onDeleteEvent, onLoadEvents, onSetActiveEvent, onUpdateEvent } from "../store";
 import calendarAPi from "../api/calendarAPi";
+import { convertEventsToDateEvents } from "../helpers";
 
 
 export const useCalendarStore = () => {
@@ -13,7 +14,7 @@ export const useCalendarStore = () => {
 
     const starSavigEvent = async(calendarEvent)=> {
         //todo: update event
-        if(calendarEvent._id){
+        if(calendarEvent.id){
             dispatch(onUpdateEvent({...calendarEvent}))
         }else {
             const {data} = await calendarAPi.post('/events', calendarEvent)
@@ -25,6 +26,19 @@ export const useCalendarStore = () => {
         dispatch(onDeleteEvent())
     }
 
+    const starLoadingEvents = async() => {
+        try {
+
+            const {data} = await calendarAPi.get('/events');
+            const events = convertEventsToDateEvents(data.eventos)
+            dispatch(onLoadEvents(events))
+            console.log(events)
+            
+        } catch (error) {
+            console.log('Error Cargando eventos')
+        }
+    }
+
     return {
         //Propiedades
         events,
@@ -34,6 +48,7 @@ export const useCalendarStore = () => {
         //metodos
         setActiveEvent,
         starSavigEvent,
-        starDeletingEvent
+        starDeletingEvent,
+        starLoadingEvents
     }
 }
