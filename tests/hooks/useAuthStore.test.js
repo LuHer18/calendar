@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { useAuthStore } from "../../src/hooks/useAuthStore";
 import { Provider } from "react-redux";
 import { authSlice } from "../../src/store";
@@ -65,8 +65,35 @@ describe('Pruebas  en useAUthStore', () => {
 
         const {errorMessage, status, user} = result.current;
         expect ({errorMessage, status, user}).toEqual({errorMessage: undefined, status: 'authenticated', user:{ name: 'Test User', uid: '6644f5d4e620393c90f5c4e4' } })
+        expect(localStorage.getItem('token')).toEqual(expect.any(String))
+        expect(localStorage.getItem('token-init-date')).toEqual(expect.any(String))
+        
 
-        console.log(result)
+    })
+
+    test('startLogin debe de fallar el login', async () => { 
+        localStorage.clear();
+        const mockStore = getMockStore({...notAutheticatedState})
+        const {result}  = renderHook(()=> useAuthStore(), {
+            wrapper: ({children})=> (
+                <Provider store={mockStore}
+                >
+                    {children}
+                </Provider>
+            )
+        });
+
+        await act(async()=> {
+           await result.current.starLogin({email:'emailito@falso.com', password:'1234556'})
+        })
+
+        const {errorMessage, status, user} = result.current;
+        expect ({errorMessage, status, user}).toEqual({errorMessage: expect.any(String), status: 'not-authenticated', user:{} })
+        expect(localStorage.getItem('token')).toBe(null)
+        await waitFor(
+            ()=> expect(result.current.errorMessage).toBe(undefined)
+        )
+        
 
     })
 
