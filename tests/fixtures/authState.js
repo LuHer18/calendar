@@ -17,3 +17,9 @@ export const notAutheticatedState = {
     user: {},
     errorMessage: undefined,
 }
+
+export const initialState2 = {
+    status: 'checking', //'authenticated' 'not-authenticated'
+    user: {},
+    errorMessage: undefined,
+}

@@ -3,7 +3,7 @@ import { useAuthStore } from "../../src/hooks/useAuthStore";
 import { Provider } from "react-redux";
 import { authSlice } from "../../src/store";
 import { configureStore } from "@reduxjs/toolkit";
-import { notAutheticatedState } from "../fixtures/authState";
+import { initialState2, notAutheticatedState } from "../fixtures/authState";
 import { testUserCredentials } from "../fixtures/testUser";
 import calendarAPi from "../../src/api/calendarAPi";
 
@@ -160,5 +160,46 @@ describe('Pruebas  en useAUthStore', () => {
           })
         
     })
+    test('checkAuthToken debe de fallar si no hay token', async() => { 
+        const mockStore = getMockStore({...initialState2})
+        const {result}  = renderHook(()=> useAuthStore(), {
+            wrapper: ({children})=> (
+                <Provider store={mockStore}
+                >
+                    {children}
+                </Provider>
+            )
+        });
+        await act(async()=> {
+            await result.current.checkAuthToken()
+        });
+
+        const {errorMessage, status, user} = result.current
+        expect({errorMessage, status, user}).toEqual({errorMessage:undefined, status: 'not-authenticated', user: {}})
+
+    })
+
+    test('checkAuthToken debe de autenticar el usuario si hay un token', async() => { 
+        const {data} = await calendarAPi.post('/auth', testUserCredentials);
+        localStorage.setItem('token', data.token);
+
+        const mockStore = getMockStore({...initialState2})
+        const {result}  = renderHook(()=> useAuthStore(), {
+            wrapper: ({children})=> (
+                <Provider store={mockStore}
+                >
+                    {children}
+                </Provider>
+            )
+        });
+        await act(async()=> {
+            await result.current.checkAuthToken()
+        });
+        console.log(result.current)
+
+        const {errorMessage, user, status} = result.current
+
+        expect({errorMessage, user, status}).toEqual({errorMessage: undefined, status: 'authenticated',  user: { name: 'Test User', uid: '6644f5d4e620393c90f5c4e4' } })
+     })
 
  })
